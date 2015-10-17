@@ -20,7 +20,7 @@ class HTTPSender:
         self.request = None
 
     @classmethod
-    def send(cls, url, values = None, method = 'GET'):
+    def send(cls, url, values = None, method = 'GET', header={}):
         c = cls()
         data = None
         context = ssl._create_unverified_context()
@@ -35,6 +35,8 @@ class HTTPSender:
         else:
             c.request = urllib.request.Request(url, data)
             c.request.add_header('Content-Type', 'application/json')
+        for key, value in header.items():
+            c.request.add_header(key,value)
 
         c.request.method = method
         # print(c.request.get_header('Content-Type'))
@@ -90,4 +92,23 @@ if __name__ == '__main__':
 
     resp = HTTPSender.send(BASE_PATH + logon_result['location'] + '/interrogation',
                                 method = 'GET')
+    print(resp.body)
+    val =  {    
+        "client_info" :{  
+                    'user': 1,
+                    'user_home_directory':'C:\\Users\\shgao\\AppData',
+                    'system_directory' : 'C:\\Windows\\system32',
+                    'x64' : False,
+                    'client_type':'CT'
+        },
+        'interrogation_info' :{
+                    'AV1444922987988AFJ': True,
+                    'AV1444922987988AFK' : True,
+                    'AV1444922987988AFI' : False
+        }
+    }
+
+    resp = HTTPSender.send(BASE_PATH + logon_result['location'] + '/interrogation',
+                                values = val, 
+                                method = 'POST', header={'User-Agent':'SONICWALL'})
     print(resp.body)
